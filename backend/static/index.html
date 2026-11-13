@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NetraGatra</title>
+<link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="loreng">
+<section id="login" class="login">
+  <form id="loginForm" class="card login-card">
+    <h1>NetraGatra</h1>
+    <p class="muted">Pos Pantau Siber Markas Terpadu</p>
+    <label>Username <input name="username" autocomplete="username" required></label>
+    <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+    <button type="submit">Masuk</button>
+    <p id="loginErr" class="err"></p>
+  </form>
+</section>
+
+<section id="app" class="hidden">
+  <header class="top">
+    <div class="brand">NetraGatra <span class="muted">Pos Pantau Siber Markas</span></div>
+    <nav id="tabs">
+      <button data-view="operator" class="active">Operator</button>
+      <button data-view="komandan">Komandan</button>
+      <button data-view="gerbang">Gerbang</button>
+      <button data-view="aset">Aset</button>
+      <button data-view="distribusi">Distribusi</button>
+      <button data-view="audit">Audit</button>
+      <button data-view="arsip">Arsip</button>
+    </nav>
+    <div class="who"><span id="who"></span> <span id="live" class="dot off" title="Koneksi live"></span>
+      <button id="lorengBtn" type="button" class="sm ghost" aria-pressed="true" title="Latar loreng">Loreng: ON</button>
+      <button id="logout" class="ghost">Keluar</button></div>
+  </header>
+
+  <main>
+    <section class="card lampu-panel" aria-label="Panel lampu siaga">
+      <div class="lp-head">
+        <div class="lp-total"><span id="lpTotal" class="lens big l0"><span>-</span></span>
+          <div><span class="muted small">Tingkat siaga markas</span><b id="lpTotalLabel">Memuat...</b></div></div>
+        <div class="lp-ctl">
+          <button id="alarmBtn" type="button" class="sm ghost" aria-pressed="true">Alarm: NYALA</button>
+          <button id="resetBtn" type="button" class="sm danger hidden">Situasi tertangani</button>
+          <span id="lpReset" class="muted small"></span>
+        </div>
+        <div class="lp-legend">
+          <span><i class="lens mini l4"></i>Normal / Aman</span><span><i class="lens mini l3"></i>Waspada</span>
+          <span><i class="lens mini l2"></i>Siaga</span><span><i class="lens mini l1"></i>Awas / Bahaya</span>
+          <span><i class="lens mini l0"></i>Belum aktif</span></div>
+      </div>
+      <h3>Fungsi inti</h3><div id="lpWajib" class="lp-row"></div>
+      <h3>Modul lanjutan</h3><div id="lpTambahan" class="lp-row"></div>
+      <div id="lpDetail" class="lp-detail" aria-live="polite"></div>
+    </section>
+
+    <div id="view-operator" class="view">
+      <div id="kpi" class="kpi"></div>
+      <div class="grid2">
+        <div class="card"><h2>Insiden</h2><div id="incList"></div></div>
+        <div class="card"><h2>Feed event live</h2><div id="feed" class="feed"></div></div>
+      </div>
+    </div>
+
+    <div id="view-komandan" class="view hidden">
+      <div class="grid2">
+        <div class="card"><h2>Status satuan</h2><div id="tree"></div>
+          <p class="muted small">Hijau (L4): aman. Kuning (L3): insiden sedang. Oranye (L2): insiden tinggi. Merah (L1): insiden kritis. Satuan induk mengikuti bawahan terburuk.</p></div>
+        <div class="card"><h2>Butuh perhatian komandan</h2><div id="cmdInc"></div></div>
+      </div>
+    </div>
+
+    <div id="view-gerbang" class="view hidden">
+      <div class="card">
+        <h2>Log kendaraan keluar-masuk (ANPR)</h2>
+        <input id="platQ" placeholder="Cari plat nomor">
+        <table><thead><tr><th>Waktu</th><th>Plat</th><th>Arah</th><th>Status</th><th>Pemilik</th><th>Kamera</th><th>Akurasi</th></tr></thead>
+        <tbody id="gateBody"></tbody></table>
+      </div>
+    </div>
+
+    <div id="view-aset" class="view hidden">
+      <div class="card"><div class="fd-bar"><h2>Peta aset IT/OT</h2>
+          <span><button id="asetBaru" type="button" class="sm hidden">+ Tambah aset</button></span></div>
+        <div id="peta" class="peta" aria-label="Peta lokasi aset"></div>
+        <p id="petaKet" class="muted small"></p>
+        <div id="galeri" class="galeri-wrap">
+          <div class="fd-bar"><h3 id="galeriJudul">Foto aset</h3><span id="galeriKet" class="muted small"></span></div>
+          <div id="galeriIsi" class="galeri"></div>
+        </div>
+        <form id="asetForm" class="aset-form hidden">
+          <h3 id="asetFormJudul">Tambah aset</h3>
+          <input type="hidden" name="id">
+          <label>Nama <input name="nama" required maxlength="120"></label>
+          <label>Satuan <select name="satuan_id" required></select></label>
+          <label>Jenis <select name="jenis"><option>OT</option><option>IT</option></select></label>
+          <label>Kategori <select name="kategori"><option>Pengamanan fisik</option><option>Pendukung markas</option>
+            <option>Server</option><option>Endpoint</option><option>Komunikasi</option><option>IoT lingkungan</option>
+            <option>Layanan publik</option></select></label>
+          <label>IP <input name="ip" required maxlength="45"></label>
+          <label>MAC <input name="mac" maxlength="17" placeholder="aa:bb:cc:dd:ee:ff"></label>
+          <label>Kekritisan <select name="kritis"><option value="3">3 (tinggi)</option><option value="2">2</option><option value="1">1</option></select></label>
+          <label>Latitude <input name="lat" type="number" step="any" min="-90" max="90"></label>
+          <label>Longitude <input name="lon" type="number" step="any" min="-180" max="180"></label>
+          <p class="muted small full">Klik peta untuk mengisi koordinat, atau tempel dari Google Maps (klik kanan titik → salin angka).</p>
+          <div class="full"><button type="submit">Simpan</button> <button id="asetBatal" type="button" class="ghost">Batal</button>
+            <span id="asetErr" class="err"></span></div>
+        </form>
+      </div>
+      <div class="card"><h2>Inventaris aset IT/OT</h2>
+        <table><thead><tr><th>Satuan</th><th>Aset</th><th>Jenis</th><th>Kategori</th><th>IP</th><th>Kekritisan</th><th>Event 24 jam</th><th>Lokasi GPS</th><th></th></tr></thead>
+        <tbody id="asetBody"></tbody></table></div>
+    </div>
+
+    <div id="view-fitur" class="view hidden">
+      <div id="fdHead" class="card fd-head"></div>
+      <div id="fdKpi" class="kpi fd-kpi"></div>
+      <div class="grid2">
+        <div class="card"><div class="fd-bar"><h2 id="fdChartTitle">Deret waktu</h2>
+          <div id="fdRange" class="fd-range">
+            <button type="button" class="sm ghost" data-menit="60">60 menit</button>
+            <button type="button" class="sm ghost" data-menit="360">6 jam</button>
+            <button type="button" class="sm ghost" data-menit="1440">24 jam</button></div></div>
+          <div id="fdChart" class="fd-chart"></div><div id="fdLegend" class="fd-legend"></div>
+          <div id="fdChart2" class="fd-chart"></div></div>
+        <div class="card"><h2 id="fdRinciTitle">Rincian</h2><div id="fdRinci"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>Insiden terakhir</h2><div id="fdLast"></div></div>
+        <div class="card"><h2 id="fdListTitle">Riwayat terkait</h2><div id="fdList"></div></div>
+      </div>
+      <div class="card"><div class="fd-bar"><h2 id="fdAktTitle">Rincian aktivitas</h2><span id="fdAktCtl"></span></div>
+        <p id="fdAktKet" class="muted small"></p><div id="fdAkt" class="fd-akt"></div></div>
+    </div>
+
+    <div id="view-distribusi" class="view hidden">
+      <div class="card"><div class="fd-bar"><h2 id="distJudul">Distribusi sitrep</h2><span id="distCtl"></span></div>
+        <p id="distKet" class="muted small"></p>
+        <table><thead><tr><th>Dikirim</th><th>Insiden</th><th>Jenjang · tujuan</th><th>Penerima</th><th>Pengirim</th><th>Sitrep</th><th>Status</th><th></th></tr></thead>
+        <tbody id="distBody"></tbody></table></div>
+    </div>
+
+    <div id="view-arsip" class="view hidden">
+      <div class="card"><h2>Arsip di direktori</h2><p id="arsipFolder" class="muted small"></p></div>
+      <div class="card"><h2 id="arsipInsTitle">Insiden</h2>
+        <table><thead><tr><th>File</th><th>Insiden</th><th>Tingkat</th><th>Status</th><th>Satuan</th><th>Waktu</th><th></th></tr></thead>
+        <tbody id="arsipIns"></tbody></table></div>
+      <div class="grid2">
+        <div class="card"><h2 id="arsipAuditTitle">Jejak audit harian</h2><div id="arsipAudit"></div></div>
+        <div class="card"><h2 id="arsipSitrepTitle">Sitrep PDF</h2><div id="arsipSitrep"></div></div>
+      </div>
+    </div>
+
+    <div id="view-audit" class="view hidden">
+      <div class="card"><h2>Jejak audit</h2>
+        <table><thead><tr><th>Waktu</th><th>Pengguna</th><th>Aksi</th><th>Detail</th></tr></thead>
+        <tbody id="auditBody"></tbody></table></div>
+    </div>
+  </main>
+</section>
+<script src="/static/vendor/leaflet/leaflet.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

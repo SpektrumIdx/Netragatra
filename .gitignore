@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Rahasia dan konfigurasi lokal
+.env
+*.key
+kredensial-awal.txt
+
+# Data runtime: database, arsip insiden/sitrep, foto unggahan, aset.json, distribusi.json
+data/
+
+# Log sensor asli (contoh fiktif contoh-alerts.json tetap ikut)
+sensor-logs/**/alerts.json
+sensor-logs/**/eve.json
+sensor-logs/**/*.log
+
+# Paket dan berkas pribadi tim
+*.zip
+docs/naskah-*.md
+*.mp4
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

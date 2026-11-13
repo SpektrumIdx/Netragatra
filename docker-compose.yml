@@ -1,0 +1,19 @@
+# NetraGatra - berjalan di jaringan lokal tanpa internet setelah image dibangun (kecuali tile peta OSM).
+# Jalankan:  docker compose up -d --build
+# Kredensial awal acak:  docker compose exec netragatra cat /data/kredensial-awal.txt
+services:
+  netragatra:
+    build: ./backend
+    ports:
+      - "127.0.0.1:8000:8000"   # di belakang reverse proxy HTTPS untuk akses jaringan
+    volumes:
+      - netra-data:/data
+      - ${SURICATA_LOG_DIR:-./sensor-logs/suricata}:/sensor/suricata:ro
+      - ${WAZUH_LOG_DIR:-./sensor-logs/wazuh}:/sensor/wazuh:ro
+    environment:
+      NETRA_SURICATA_EVE: /sensor/suricata/eve.json
+      NETRA_WAZUH_ALERTS: /sensor/wazuh/alerts.json
+      # NETRA_USERS: "operator:GantiPassword:operator,komandan:GantiPassword:komandan"
+    restart: unless-stopped
+volumes:
+  netra-data:
