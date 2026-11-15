@@ -108,7 +108,7 @@ flowchart LR
 | `firmware/esp32_dht22/` | Sketch ESP32 sensor suhu dan kelembapan |
 | `tools/` | Jembatan serial ESP32, pengunduh foto contoh, pembuat pola loreng |
 
-## Status jujur: apa yang nyata dan apa yang masih simulasi
+## Status apa yang nyata dan apa yang masih simulasi
 
 | Bagian | Status |
 | --- | --- |

@@ -235,8 +235,13 @@ def sinkron_awal():
             tulis_audit(r)
 
 
+def tampil_path(p):
+    """Path relatif terhadap folder data, untuk ditampilkan di UI."""
+    return "data/" + os.path.relpath(p, DATA_DIR).replace(os.sep, "/")
+
+
 def daftar():
-    out = {"folder": ARSIP, "aset_file": ASET_FILE}
+    out = {"folder": tampil_path(ARSIP), "aset_file": tampil_path(ASET_FILE)}
     for j in JENIS:
         d = os.path.join(ARSIP, j)
         files = sorted((f for f in os.listdir(d) if not f.endswith(".tmp")), reverse=True) if os.path.isdir(d) else []

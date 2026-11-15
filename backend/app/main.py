@@ -298,7 +298,7 @@ def kirim_sitrep(iid: int, u=Depends(require_operator)):
 @app.get("/api/distribusi")
 def distribusi_daftar(u=Depends(current_user)):
     c = distribusi.cfg()
-    return {"daftar": distribusi.daftar(), "batas_menit": c.get("batas_menit"), "file": distribusi.FILE}
+    return {"daftar": distribusi.daftar(), "batas_menit": c.get("batas_menit"), "file": arsip.tampil_path(distribusi.FILE)}
 
 
 class Akui(BaseModel):
